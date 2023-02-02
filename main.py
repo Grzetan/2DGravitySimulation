@@ -23,42 +23,59 @@ grid = np.zeros((GRID_SIZE, GRID_SIZE, 2), dtype=np.int32)
 offset_x = (W + abs(START) + END) / GRID_SIZE
 offset_y = (H + abs(START) + END) / GRID_SIZE
 
-gravity_points = [(200,200)]
+gravity_points = [[200,200]]
 
-gravity_force = 5000
-falloff = 1
+gravity_force = 4000
 
-for x in range(GRID_SIZE):
-    for y in range(GRID_SIZE):
-        default_x = START + x * offset_x
-        default_y = START + y * offset_y
-        for p in gravity_points:
-            dx = p[0] - default_x
-            dy = p[1] - default_y
-            d = math.sqrt(dx * dx + dy * dy)
-            a = math.atan2(dy, dx)
-            f = gravity_force / math.pow(d, falloff);
-            if f > d:
-                f = d
-            default_x += math.cos(a) * f
-            default_y += math.sin(a) * f    
-    
-        grid[x,y,0] = default_x
-        grid[x,y,1] = default_y
+selected = None
+
+def update():
+    for x in range(GRID_SIZE):
+        for y in range(GRID_SIZE):
+            default_x = START + x * offset_x
+            default_y = START + y * offset_y
+            for p in gravity_points:
+                dx = p[0] - default_x
+                dy = p[1] - default_y
+                d = math.sqrt(dx * dx + dy * dy)
+                a = math.atan2(dy, dx)
+                f = gravity_force / d
+                if f > d:
+                    f = d
+                default_x += math.cos(a) * f
+                default_y += math.sin(a) * f    
+        
+            grid[x,y,0] = default_x
+            grid[x,y,1] = default_y
+
+update()
 
 while not exit:
     canvas.fill(WHITE)
   
     for x in range(1,GRID_SIZE):
         for y in range(1, GRID_SIZE):
-            pygame.draw.line(canvas, BLACK, grid[x,y], grid[x-1, y])
-            pygame.draw.line(canvas, BLACK, grid[x,y], grid[x, y-1])
+            pygame.draw.line(canvas, BLACK, grid[x,y], grid[x-1, y], 2)
+            pygame.draw.line(canvas, BLACK, grid[x,y], grid[x, y-1], 2)
 
     for p in gravity_points:
-        pygame.draw.circle(canvas, RED, p, 4)
+        pygame.draw.circle(canvas, RED, p, 7)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit = True
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+
+            for i, p in enumerate(gravity_points):
+                if math.sqrt((pos[0] - p[0])**2 + (pos[1] - p[1])**2) < 10:
+                    selected = i
+        elif event.type == pygame.MOUSEMOTION:
+            if selected is not None:
+                pos = pygame.mouse.get_pos()
+                gravity_points[selected] = pos
+                update()
+        elif event.type == pygame.MOUSEBUTTONUP:
+            selected = None
   
     pygame.display.update()
