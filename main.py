@@ -9,7 +9,7 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 
 W, H = 800, 800
-GRID_SIZE = 100
+GRID_SIZE = 70
 
 canvas = pygame.display.set_mode((W, H))
   
@@ -23,7 +23,7 @@ grid = np.zeros((GRID_SIZE, GRID_SIZE, 2), dtype=np.int32)
 offset_x = (W + abs(START) + END) / GRID_SIZE
 offset_y = (H + abs(START) + END) / GRID_SIZE
 
-gravity_points = [[200,200]]
+gravity_points = [[200,200], [300,300]]
 
 gravity_force = 4000
 
@@ -65,11 +65,15 @@ while not exit:
         if event.type == pygame.QUIT:
             exit = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            pos = pygame.mouse.get_pos()
+            if pygame.mouse.get_pressed()[0]:
+                pos = pygame.mouse.get_pos()
 
-            for i, p in enumerate(gravity_points):
-                if math.sqrt((pos[0] - p[0])**2 + (pos[1] - p[1])**2) < 10:
-                    selected = i
+                for i, p in enumerate(gravity_points):
+                    if math.sqrt((pos[0] - p[0])**2 + (pos[1] - p[1])**2) < 10:
+                        selected = i
+            elif pygame.mouse.get_pressed()[2]:
+                gravity_points.append(pygame.mouse.get_pos())
+                update()
         elif event.type == pygame.MOUSEMOTION:
             if selected is not None:
                 pos = pygame.mouse.get_pos()
