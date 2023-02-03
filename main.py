@@ -14,7 +14,9 @@ GRID_SIZE = 70
 canvas = pygame.display.set_mode((W, H))
   
 pygame.display.set_caption("Gravity")
-  
+
+im = pygame.image.load("./julia.png").convert_alpha()
+
 exit = False
 
 START = -200
@@ -23,11 +25,13 @@ grid = np.zeros((GRID_SIZE, GRID_SIZE, 2), dtype=np.int32)
 offset_x = (W + abs(START) + END) / GRID_SIZE
 offset_y = (H + abs(START) + END) / GRID_SIZE
 
-gravity_points = [[200,200], [300,300]]
+gravity_points = []
 
 gravity_force = 4000
 
 selected = None
+
+show_points = True
 
 def update():
     for x in range(GRID_SIZE):
@@ -58,8 +62,11 @@ while not exit:
             pygame.draw.line(canvas, BLACK, grid[x,y], grid[x-1, y], 2)
             pygame.draw.line(canvas, BLACK, grid[x,y], grid[x, y-1], 2)
 
-    for p in gravity_points:
-        pygame.draw.circle(canvas, RED, p, 7)
+    canvas.blit(im, (100,100))
+
+    if show_points:
+        for p in gravity_points:
+            pygame.draw.circle(canvas, RED, p, 7)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -81,5 +88,7 @@ while not exit:
                 update()
         elif event.type == pygame.MOUSEBUTTONUP:
             selected = None
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            show_points = not show_points
   
     pygame.display.update()
